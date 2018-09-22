@@ -12,11 +12,16 @@ import java.util.Scanner;
 
 public class project 
 {
-	private static String file_location = "/home/andrew/Desktop/log.txt";
-	private static String data_location = "/home/andrew/Desktop/data.csv";
+	private static String file_location = "/home/andrew/Desktop/match-up/log.txt";
+	private static String data_location = "/home/andrew/Desktop/match-up/data.csv";
 	private static String [] filtered_chars = {"[", "]", ","};
 	
 	public static void main(String [] args)
+	{
+		create_dataset();
+	}
+	
+	private static void create_dataset()
 	{
 		File file = new File(file_location);
 		Scanner scr = null;
@@ -89,7 +94,7 @@ public class project
 		catch (FileNotFoundException ex) 
 		{
 			ex.printStackTrace();
-		}
+		}	
 	}
 	
 	private static void print_csv(ArrayList<Integer []> tuples) throws IOException
@@ -119,5 +124,68 @@ public class project
 			}
 		}
 		return input;
+	}
+
+	private static int [] generate_random(int max, int min, int sum, int size)
+	{
+		// Initialized Array, set to minimum
+		int [] generated = new int[size];
+		Arrays.fill(generated, min);
+		
+		Random coin = new Random();
+		int index = 0;
+		
+		// Flip a coin. 1 fill, 0 no fill move to next.
+		while(sum(generated) != sum)
+		{
+			// Avoid Index out of Bounds!
+			if(index == size)
+			{
+				index = 0;
+			}
+			// Skip Index if it is max!
+			if(generated[i] == max)
+			{
+				++index;
+				continue;
+			}
+			
+			// Flip the coin [0, 1], fill/skip and continue
+			int fill = coin.nextInt(2);
+			if(fill == 1)
+			{
+				++generated[i];
+			}
+			++index;
+		}
+		return generated;
+	}
+	
+	private static int sum(int [] a)
+	{
+		int answer = 0;
+		for (int i = 0; i < a.length; i++)
+		{
+			answer += a[i];
+		}
+	}
+	
+	// Get Mean
+	private static int mean(int [] a)
+	{
+		return sum(a)/a.length;
+	}
+	
+	// Get Variance
+	private static int variance(int [] a)
+	{
+		int mean = mean(a);
+		int variance = 0;
+		for (int i = 0; i < a.length; i++)
+		{
+			variance += (a[i] -  mean);
+		}
+		variance = variance/(a.length - 1);
+		return variance;
 	}
 }
