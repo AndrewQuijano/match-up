@@ -14,7 +14,9 @@ public class project
 {
 	private static String file_location = "C:\\Users\\Andrew\\Desktop\\match-up\\log.txt";
 	private static String data_location = "C:\\Users\\Andrew\\Desktop\\match-up\\data.csv";
+	private static int LINE_SIZE = (5 * 2) + 1;
 	private static String [] filtered_chars = {"[", "]", ","};
+	private static ArrayList<Double []> data = new ArrayList<Double []>();
 	
 	public static void main(String [] args)
 	{
@@ -39,7 +41,8 @@ public class project
 				line = scr.nextLine();
 				if (line.contains("Round"))
 				{	
-					Integer [] tuple = new Integer[15];
+					Integer [] tuple = new Integer[LINE_SIZE];
+					Double [] data_entry = new Double[4];
 		
 					// Next 3 Lines got data I want to have!
 					// Get the first team's list! index 4, 5, 6, 7, 8 are what I want!
@@ -69,27 +72,28 @@ public class project
 					int team_two_score = Integer.parseInt(line_parts[4]);
 					
 					// Get Mean and Variance of team 1
-					tuple[10] = mean(tuple, 0, 5);
-					tuple[11] = variance(tuple, 0, 5);
+					data_entry[0] = mean(tuple, 0, 5);
+					data_entry[1] = variance(tuple, 0, 5);
 					
 					// Get Mean and Variance of team 2
-					tuple[12] = mean(tuple, 5, 10);
-					tuple[13] = variance(tuple, 5, 10);
+					data_entry[2] = mean(tuple, 5, 10);
+					data_entry[3] = variance(tuple, 5, 10);
 					
 					// Fill up y with score
 					if(team_one_score > team_two_score)
 					{
-						tuple[14] = 1;
+						tuple[10] = 1;
 					}
 					else if(team_one_score == team_two_score)
 					{
-						tuple[14] = 0;
+						tuple[10] = 0;
 					}
 					else
 					{
-						tuple[14] = -1;
+						tuple[10] = -1;
 					}
 					rows.add(tuple);
+					data.add(data_entry);
 				}
 			}
 			try 
@@ -113,16 +117,34 @@ public class project
 	{
 		//FileOutputStream outputStream = new FileOutputStream(data_location);
 		BufferedWriter writer = new BufferedWriter(new FileWriter(data_location));
-		String output = null;
+		String output = "";
 		writer.write("L1_1,L1_2,L1_3,L1_4,L1_5,L2_1,L2_2,L2_3,L2_4,L2_5,L1_mean,L1_variance,L2_mean,L2_variance,Win/Loss/Tie\n");
 		for (int i = 0; i < tuples.size();i++)
 		{
+			/*
 			output = Arrays.toString(tuples.get(i));
 			output = output.replace(" ", "");
 			output = output.replace("]", "");
 			output = output.replace("[", "");
+			*/
+			Integer [] temp = tuples.get(i);
+			Double [] data_temp = data.get(i);
+			
+			// Print L_1, L_2
+			for (int j = 0; j < LINE_SIZE - 1;j++)
+			{
+				output += String.valueOf(temp[j]) + ",";
+			}
+			// Print means/varainces
+			for (int k = 0; k < 4; k++)
+			{
+				output += String.valueOf(data_temp[k] + ",");
+			}
+			output += String.valueOf(temp[10]);
+			
 			writer.write(output + '\n');
 			writer.flush();
+			output = "";
 		}
 		writer.close();
 	}
@@ -171,6 +193,7 @@ public class project
 			}
 			++index;
 		}
+		System.out.println(Arrays.toString(generated));
 		return generated;
 	}
 	
@@ -185,21 +208,21 @@ public class project
 	}
 	
 	// Get Mean
-	private static int mean(Integer [] a, int min, int max)
+	private static double mean(Integer [] a, int min, int max)
 	{
-		return sum(a, min, max)/(max - min);
+		return (double) sum(a, min, max)/(max - min);
 	}
 	
 	// Get Variance
-	private static int variance(Integer [] a, int min, int max)
+	private static double variance(Integer [] a, int min, int max)
 	{
-		int mean = mean(a, min, max);
-		int variance = 0;
+		double mean = mean(a, min, max);
+		double variance = 0;
 		for (int i = min; i < max; i++)
 		{
-			variance += (a[i] -  mean);
+			variance += (a[i].doubleValue() -  mean)*(a[i].doubleValue() -  mean);
 		}
-		variance = variance/(a.length - 1);
+		variance = variance/(max - min);
 		return variance;
 	}
 }
