@@ -1,19 +1,19 @@
-package project1;
+package project;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.Scanner;
 
 public class project 
 {
-	private static String file_location = "/home/andrew/Desktop/match-up/log.txt";
-	private static String data_location = "/home/andrew/Desktop/match-up/data.csv";
+	private static String file_location = "C:\\Users\\Andrew\\Desktop\\match-up\\log.txt";
+	private static String data_location = "C:\\Users\\Andrew\\Desktop\\match-up\\data.csv";
 	private static String [] filtered_chars = {"[", "]", ","};
 	
 	public static void main(String [] args)
@@ -39,7 +39,8 @@ public class project
 				line = scr.nextLine();
 				if (line.contains("Round"))
 				{	
-					Integer [] tuple = new Integer[11];
+					Integer [] tuple = new Integer[15];
+		
 					// Next 3 Lines got data I want to have!
 					// Get the first team's list! index 4, 5, 6, 7, 8 are what I want!
 					line = scr.nextLine();
@@ -64,22 +65,31 @@ public class project
 					line = scr.nextLine();
 					line = line.replace(",", "");
 					line_parts = line.split(" ");
-					int team_one = Integer.parseInt(line_parts[2]);
-					int team_two = Integer.parseInt(line_parts[4]);
-					if(team_one > team_two)
+					int team_one_score = Integer.parseInt(line_parts[2]);
+					int team_two_score = Integer.parseInt(line_parts[4]);
+					
+					// Get Mean and Variance of team 1
+					tuple[10] = mean(tuple, 0, 5);
+					tuple[11] = variance(tuple, 0, 5);
+					
+					// Get Mean and Variance of team 2
+					tuple[12] = mean(tuple, 5, 10);
+					tuple[13] = variance(tuple, 5, 10);
+					
+					// Fill up y with score
+					if(team_one_score > team_two_score)
 					{
-						tuple[10] = -1;
+						tuple[14] = 1;
 					}
-					else if(team_one == team_two)
+					else if(team_one_score == team_two_score)
 					{
-						tuple[10] = 0;
+						tuple[14] = 0;
 					}
 					else
 					{
-						tuple[10] = 1;
+						tuple[14] = -1;
 					}
 					rows.add(tuple);
-					//System.out.println(Arrays.toString(tuple));
 				}
 			}
 			try 
@@ -97,18 +107,21 @@ public class project
 		}	
 	}
 	
+	
+	// team 1 wins = 1, team 1 and team 2 tie, team 1 loses = -1
 	private static void print_csv(ArrayList<Integer []> tuples) throws IOException
 	{
 		//FileOutputStream outputStream = new FileOutputStream(data_location);
 		BufferedWriter writer = new BufferedWriter(new FileWriter(data_location));
 		String output = null;
+		writer.write("L1_1,L1_2,L1_3,L1_4,L1_5,L2_1,L2_2,L2_3,L2_4,L2_5,L1_mean,L1_variance,L2_mean,L2_variance,Win/Loss/Tie\n");
 		for (int i = 0; i < tuples.size();i++)
 		{
 			output = Arrays.toString(tuples.get(i));
 			output = output.replace(" ", "");
 			output = output.replace("]", "");
 			output = output.replace("[", "");
-			writer.write(output+'\n');
+			writer.write(output + '\n');
 			writer.flush();
 		}
 		writer.close();
@@ -126,17 +139,17 @@ public class project
 		return input;
 	}
 
-	private static int [] generate_random(int max, int min, int sum, int size)
+	private static Integer [] generate_random(int max, int min, int sum, int size)
 	{
 		// Initialized Array, set to minimum
-		int [] generated = new int[size];
+		Integer [] generated = new Integer[size];
 		Arrays.fill(generated, min);
 		
 		Random coin = new Random();
 		int index = 0;
 		
 		// Flip a coin. 1 fill, 0 no fill move to next.
-		while(sum(generated) != sum)
+		while(sum(generated, 0, generated.length) != sum)
 		{
 			// Avoid Index out of Bounds!
 			if(index == size)
@@ -144,7 +157,7 @@ public class project
 				index = 0;
 			}
 			// Skip Index if it is max!
-			if(generated[i] == max)
+			if(generated[index] == max)
 			{
 				++index;
 				continue;
@@ -154,34 +167,35 @@ public class project
 			int fill = coin.nextInt(2);
 			if(fill == 1)
 			{
-				++generated[i];
+				++generated[index];
 			}
 			++index;
 		}
 		return generated;
 	}
 	
-	private static int sum(int [] a)
+	private static int sum(Integer [] a, int min, int max)
 	{
 		int answer = 0;
-		for (int i = 0; i < a.length; i++)
+		for (int i = min; i < max; i++)
 		{
 			answer += a[i];
 		}
+		return answer;
 	}
 	
 	// Get Mean
-	private static int mean(int [] a)
+	private static int mean(Integer [] a, int min, int max)
 	{
-		return sum(a)/a.length;
+		return sum(a, min, max)/(max - min);
 	}
 	
 	// Get Variance
-	private static int variance(int [] a)
+	private static int variance(Integer [] a, int min, int max)
 	{
-		int mean = mean(a);
+		int mean = mean(a, min, max);
 		int variance = 0;
-		for (int i = 0; i < a.length; i++)
+		for (int i = min; i < max; i++)
 		{
 			variance += (a[i] -  mean);
 		}
